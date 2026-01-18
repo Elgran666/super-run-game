@@ -1,0 +1,1038 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Super Run! - Retro Mario-Style Runner Game</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(180deg, #5c94fc 0%, #5c94fc 60%, #00a800 60%, #00a800 100%);
+      font-family: 'Press Start 2P', cursive;
+      padding: 20px;
+    }
+    
+    .game-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+    }
+    
+    .game-container {
+      position: relative;
+      width: 100%;
+      max-width: 640px;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 
+        0 0 0 4px #000,
+        0 0 0 8px #8b4513,
+        0 0 0 12px #000,
+        0 8px 32px rgba(0, 0, 0, 0.5);
+      image-rendering: pixelated;
+    }
+    
+    #gameCanvas {
+      display: block;
+      width: 100%;
+      height: auto;
+      cursor: pointer;
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+    }
+    
+    .game-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: rgba(92, 148, 252, 0.95);
+      transition: opacity 0.3s;
+    }
+    
+    .game-overlay.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+    
+    .game-title {
+      font-size: 1.8rem;
+      color: #fff;
+      text-shadow: 
+        4px 4px 0 #e52521,
+        -2px -2px 0 #000,
+        2px -2px 0 #000,
+        -2px 2px 0 #000,
+        2px 2px 0 #000;
+      margin-bottom: 8px;
+      letter-spacing: 3px;
+      animation: titleBounce 0.5s ease-in-out infinite alternate;
+    }
+    
+    @keyframes titleBounce {
+      from { transform: translateY(0); }
+      to { transform: translateY(-8px); }
+    }
+    
+    .game-subtitle {
+      color: #1a1a1a;
+      font-size: 0.6rem;
+      margin-bottom: 24px;
+      text-shadow: 1px 1px 0 #fff;
+    }
+    
+    .game-start-btn {
+      font-family: 'Press Start 2P', cursive;
+      background: #e52521;
+      color: white;
+      border: 4px solid #000;
+      padding: 16px 32px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.1s;
+      box-shadow: 6px 6px 0 #000;
+      text-shadow: 2px 2px 0 #8b0000;
+    }
+    
+    .game-start-btn:hover {
+      transform: translate(3px, 3px);
+      box-shadow: 3px 3px 0 #000;
+    }
+    
+    .game-start-btn:active {
+      transform: translate(6px, 6px);
+      box-shadow: 0 0 0 #000;
+    }
+    
+    .game-hud {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      right: 12px;
+      display: flex;
+      justify-content: space-between;
+      pointer-events: none;
+    }
+    
+    .hud-item {
+      font-size: 0.7rem;
+      color: #fff;
+      text-shadow: 2px 2px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000;
+      background: rgba(0,0,0,0.4);
+      padding: 8px 12px;
+      border-radius: 4px;
+    }
+    
+    .game-instructions {
+      color: #fff;
+      font-size: 0.5rem;
+      text-align: center;
+      line-height: 2;
+      text-shadow: 2px 2px 0 #000;
+    }
+    
+    .final-score {
+      font-size: 2rem;
+      color: #ffd700;
+      margin: 16px 0;
+      text-shadow: 4px 4px 0 #000;
+      animation: scorePop 0.3s ease-out;
+    }
+    
+    @keyframes scorePop {
+      0% { transform: scale(0); }
+      80% { transform: scale(1.2); }
+      100% { transform: scale(1); }
+    }
+    
+    .new-high-score {
+      color: #ffd700;
+      font-size: 0.7rem;
+      animation: rainbow 1s linear infinite, bounce 0.3s ease-in-out infinite alternate;
+      text-shadow: 2px 2px 0 #000;
+      margin-bottom: 16px;
+    }
+    
+    @keyframes rainbow {
+      0% { color: #ff0000; }
+      16% { color: #ff8800; }
+      33% { color: #ffff00; }
+      50% { color: #00ff00; }
+      66% { color: #0088ff; }
+      83% { color: #ff00ff; }
+      100% { color: #ff0000; }
+    }
+    
+    @keyframes bounce {
+      from { transform: translateY(0); }
+      to { transform: translateY(-4px); }
+    }
+    
+    .credits {
+      margin-top: 24px;
+      color: #fff;
+      font-size: 0.4rem;
+      text-shadow: 1px 1px 0 #000;
+      opacity: 0.8;
+    }
+    
+    .credits a {
+      color: #ffd700;
+      text-decoration: none;
+    }
+    
+    .credits a:hover {
+      text-decoration: underline;
+    }
+
+    @media (max-width: 680px) {
+      .game-title {
+        font-size: 1.2rem;
+      }
+      .game-start-btn {
+        padding: 12px 24px;
+        font-size: 0.8rem;
+      }
+      .hud-item {
+        font-size: 0.5rem;
+        padding: 6px 8px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="game-wrapper">
+    <div class="game-container" id="gameContainer">
+      <canvas id="gameCanvas" width="640" height="320"></canvas>
+      
+      <!-- HUD -->
+      <div class="game-hud">
+        <div class="hud-item" id="scoreDisplay">COINS: 0</div>
+        <div class="hud-item" id="highScoreDisplay">BEST: 0</div>
+      </div>
+      
+      <!-- Start Overlay -->
+      <div class="game-overlay" id="startOverlay">
+        <div class="game-title">SUPER RUN!</div>
+        <div class="game-subtitle">A RETRO ADVENTURE</div>
+        <button class="game-start-btn" id="startBtn">★ START ★</button>
+      </div>
+      
+      <!-- Game Over Overlay -->
+      <div class="game-overlay hidden" id="gameOverOverlay">
+        <div class="game-title">GAME OVER</div>
+        <div class="final-score" id="finalScore">0</div>
+        <div class="new-high-score hidden" id="newHighScore">★ NEW RECORD! ★</div>
+        <button class="game-start-btn" id="restartBtn">TRY AGAIN</button>
+      </div>
+    </div>
+    
+    <p class="game-instructions">
+      PRESS [SPACE] OR [↑] OR TAP TO JUMP<br>
+      DOUBLE JUMP AVAILABLE! • STOMP GOOMBAS FOR BONUS!
+    </p>
+    
+    <p class="credits">
+      Made with ❤️ by <a href="https://github.com/YOUR_USERNAME" target="_blank">YOUR_USERNAME</a>
+    </p>
+  </div>
+
+<script>
+// 🎮 SUPER RUN - RETRO MARIO-STYLE RUNNER GAME
+(function() {
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    ctx.imageSmoothingEnabled = false;
+    
+    const scoreDisplay = document.getElementById('scoreDisplay');
+    const highScoreDisplay = document.getElementById('highScoreDisplay');
+    const startOverlay = document.getElementById('startOverlay');
+    const gameOverOverlay = document.getElementById('gameOverOverlay');
+    const finalScoreEl = document.getElementById('finalScore');
+    const newHighScoreEl = document.getElementById('newHighScore');
+    const startBtn = document.getElementById('startBtn');
+    const restartBtn = document.getElementById('restartBtn');
+    
+    // NES-style color palette
+    const COLORS = {
+        sky: '#5c94fc',
+        skyGradient: '#a8d8ff',
+        ground: '#c84c0c',
+        groundDark: '#a83800',
+        groundLight: '#fc9838',
+        brick: '#d85800',
+        brickDark: '#a83800',
+        brickLight: '#fcb87c',
+        pipe: '#80d010',
+        pipeDark: '#208020',
+        pipeLight: '#b8f818',
+        coin: '#ffc800',
+        coinLight: '#fcfcfc',
+        coinDark: '#e89800',
+        questionBlock: '#fcb87c',
+        questionBlockDark: '#c84c0c',
+        cloudWhite: '#fcfcfc',
+        cloudGray: '#bcbcbc',
+        hillGreen: '#00a800',
+        hillDark: '#008000',
+        bushGreen: '#80d010',
+        mario: {
+            red: '#e52521',
+            redDark: '#8b0000',
+            skin: '#ffb8a0',
+            brown: '#6b4423',
+            blue: '#0038b8'
+        },
+        goomba: {
+            brown: '#c84c0c',
+            face: '#fcb87c',
+            feet: '#000'
+        }
+    };
+    
+    // Game constants
+    const GRAVITY = 0.7;
+    const JUMP_FORCE = -14;
+    const GROUND_Y = 260;
+    const GAME_SPEED_INITIAL = 5;
+    const GAME_SPEED_INCREMENT = 0.0008;
+    const PIXEL = 4;
+    
+    // Game state
+    let gameRunning = false;
+    let score = 0;
+    let coins = 0;
+    let highScore = parseInt(localStorage.getItem('superRunHighScore') || '0');
+    let gameSpeed = GAME_SPEED_INITIAL;
+    let frameCount = 0;
+    
+    // Player
+    const player = {
+        x: 80,
+        y: GROUND_Y,
+        width: 32,
+        height: 44,
+        velocityY: 0,
+        jumpsLeft: 2,
+        isOnGround: true,
+        runFrame: 0,
+        invincible: 0
+    };
+    
+    // Game objects
+    let obstacles = [];
+    let coinObjects = [];
+    let particles = [];
+    let clouds = [];
+    let hills = [];
+    let bushes = [];
+    
+    // Initialize background
+    function initBackground() {
+        clouds = [];
+        hills = [];
+        bushes = [];
+        
+        for (let i = 0; i < 4; i++) {
+            clouds.push({
+                x: i * 200 + Math.random() * 100,
+                y: 40 + Math.random() * 60,
+                type: Math.floor(Math.random() * 3)
+            });
+        }
+        
+        for (let i = 0; i < 3; i++) {
+            hills.push({
+                x: i * 300 + Math.random() * 100,
+                size: 1 + Math.floor(Math.random() * 2)
+            });
+        }
+        
+        for (let i = 0; i < 5; i++) {
+            bushes.push({
+                x: i * 180 + Math.random() * 80,
+                size: 1 + Math.floor(Math.random() * 2)
+            });
+        }
+    }
+    
+    initBackground();
+    highScoreDisplay.textContent = 'BEST: ' + highScore;
+    
+    // Pixel drawing helpers
+    function drawPixelRect(x, y, w, h) {
+        ctx.fillRect(Math.floor(x), Math.floor(y), w, h);
+    }
+    
+    // Draw cloud
+    function drawCloud(x, y, type) {
+        ctx.fillStyle = COLORS.cloudWhite;
+        const p = PIXEL;
+        
+        if (type === 0) {
+            drawPixelRect(x + p, y, p * 3, p);
+            drawPixelRect(x, y + p, p * 5, p * 2);
+        } else if (type === 1) {
+            drawPixelRect(x + p * 2, y, p * 3, p);
+            drawPixelRect(x + p, y + p, p * 5, p);
+            drawPixelRect(x, y + p * 2, p * 7, p * 2);
+        } else {
+            drawPixelRect(x + p * 2, y, p * 4, p);
+            drawPixelRect(x + p, y + p, p * 6, p);
+            drawPixelRect(x + p * 7, y + p, p * 2, p);
+            drawPixelRect(x, y + p * 2, p * 10, p * 2);
+        }
+        
+        ctx.fillStyle = COLORS.cloudGray;
+        drawPixelRect(x, y + p * 3, p, p);
+        if (type > 0) drawPixelRect(x + p * 6, y + p * 3, p, p);
+    }
+    
+    // Draw hill
+    function drawHill(x, size) {
+        const p = PIXEL;
+        const h = size * 6;
+        const w = size * 16;
+        const baseY = GROUND_Y;
+        
+        ctx.fillStyle = COLORS.hillGreen;
+        
+        for (let row = 0; row < h; row++) {
+            const rowWidth = (h - row) * 2.5;
+            const startX = x + (w - rowWidth * p) / 2;
+            drawPixelRect(startX, baseY - (row + 1) * p, rowWidth * p, p);
+        }
+        
+        ctx.fillStyle = COLORS.hillDark;
+        drawPixelRect(x + w / 2 - p, baseY - h * p + p * 3, p * 2, p);
+        drawPixelRect(x + w / 2 - p * 3, baseY - p * 3, p, p);
+        drawPixelRect(x + w / 2 + p * 2, baseY - p * 4, p, p);
+    }
+    
+    // Draw bush
+    function drawBush(x, size) {
+        const p = PIXEL;
+        ctx.fillStyle = COLORS.bushGreen;
+        
+        const segments = size + 1;
+        for (let i = 0; i < segments; i++) {
+            const bx = x + i * p * 5;
+            drawPixelRect(bx + p, GROUND_Y - p * 3, p * 3, p);
+            drawPixelRect(bx, GROUND_Y - p * 2, p * 5, p * 2);
+        }
+    }
+    
+    // Draw Mario
+    function drawMario() {
+        const px = Math.floor(player.x);
+        const py = Math.floor(player.y);
+        const p = PIXEL;
+        
+        if (player.invincible > 0 && Math.floor(frameCount / 4) % 2 === 0) return;
+        
+        const running = player.isOnGround && gameRunning;
+        const frame = running ? Math.floor(player.runFrame / 6) % 3 : 0;
+        const jumping = !player.isOnGround;
+        
+        // Hat
+        ctx.fillStyle = COLORS.mario.red;
+        drawPixelRect(px + p * 2, py, p * 4, p);
+        drawPixelRect(px + p, py + p, p * 6, p);
+        
+        // Hair and face
+        ctx.fillStyle = COLORS.mario.brown;
+        drawPixelRect(px + p, py + p * 2, p * 2, p);
+        drawPixelRect(px + p, py + p * 3, p, p);
+        
+        ctx.fillStyle = COLORS.mario.skin;
+        drawPixelRect(px + p * 3, py + p * 2, p * 3, p);
+        drawPixelRect(px + p * 2, py + p * 3, p * 4, p);
+        drawPixelRect(px + p * 2, py + p * 4, p * 4, p);
+        
+        // Eyes and mustache
+        ctx.fillStyle = '#000';
+        drawPixelRect(px + p * 4, py + p * 2, p, p);
+        drawPixelRect(px + p * 3, py + p * 4, p * 3, p);
+        
+        // Body
+        ctx.fillStyle = COLORS.mario.red;
+        drawPixelRect(px + p, py + p * 5, p * 6, p);
+        drawPixelRect(px + p * 2, py + p * 6, p * 4, p);
+        
+        // Overalls
+        ctx.fillStyle = COLORS.mario.blue;
+        drawPixelRect(px + p, py + p * 6, p, p * 2);
+        drawPixelRect(px + p * 6, py + p * 6, p, p * 2);
+        drawPixelRect(px + p * 2, py + p * 7, p * 4, p);
+        
+        // Buttons
+        ctx.fillStyle = '#ffd700';
+        drawPixelRect(px + p * 2, py + p * 6, p, p);
+        drawPixelRect(px + p * 5, py + p * 6, p, p);
+        
+        // Legs
+        ctx.fillStyle = COLORS.mario.blue;
+        if (jumping) {
+            drawPixelRect(px + p, py + p * 8, p * 2, p * 2);
+            drawPixelRect(px + p * 5, py + p * 8, p * 2, p * 2);
+        } else if (frame === 0) {
+            drawPixelRect(px + p * 2, py + p * 8, p * 2, p * 2);
+            drawPixelRect(px + p * 4, py + p * 8, p * 2, p * 2);
+        } else if (frame === 1) {
+            drawPixelRect(px + p, py + p * 8, p * 2, p * 2);
+            drawPixelRect(px + p * 5, py + p * 8, p * 2, p * 2);
+        } else {
+            drawPixelRect(px + p * 3, py + p * 8, p * 2, p * 2);
+            drawPixelRect(px + p * 4, py + p * 8, p * 2, p * 2);
+        }
+        
+        // Shoes
+        ctx.fillStyle = COLORS.mario.brown;
+        if (jumping) {
+            drawPixelRect(px, py + p * 10, p * 3, p);
+            drawPixelRect(px + p * 5, py + p * 10, p * 3, p);
+        } else if (frame === 0) {
+            drawPixelRect(px + p, py + p * 10, p * 3, p);
+            drawPixelRect(px + p * 4, py + p * 10, p * 3, p);
+        } else if (frame === 1) {
+            drawPixelRect(px, py + p * 10, p * 3, p);
+            drawPixelRect(px + p * 5, py + p * 10, p * 3, p);
+        } else {
+            drawPixelRect(px + p * 2, py + p * 10, p * 4, p);
+        }
+        
+        if (running) player.runFrame++;
+    }
+    
+    // Draw Goomba
+    function drawGoomba(obs) {
+        const x = Math.floor(obs.x);
+        const y = Math.floor(obs.y);
+        const p = PIXEL;
+        const walkFrame = Math.floor(frameCount / 10) % 2;
+        
+        ctx.fillStyle = COLORS.goomba.brown;
+        drawPixelRect(x + p * 2, y, p * 4, p);
+        drawPixelRect(x + p, y + p, p * 6, p);
+        drawPixelRect(x, y + p * 2, p * 8, p * 3);
+        
+        ctx.fillStyle = COLORS.goomba.face;
+        drawPixelRect(x + p, y + p * 2, p * 2, p * 2);
+        drawPixelRect(x + p * 5, y + p * 2, p * 2, p * 2);
+        drawPixelRect(x + p * 2, y + p * 4, p * 4, p);
+        
+        ctx.fillStyle = '#000';
+        drawPixelRect(x + p * 2, y + p * 2, p, p);
+        drawPixelRect(x + p * 5, y + p * 2, p, p);
+        
+        ctx.fillStyle = COLORS.goomba.brown;
+        drawPixelRect(x + p, y + p, p, p);
+        drawPixelRect(x + p * 6, y + p, p, p);
+        
+        ctx.fillStyle = COLORS.goomba.feet;
+        if (walkFrame === 0) {
+            drawPixelRect(x, y + p * 5, p * 3, p);
+            drawPixelRect(x + p * 5, y + p * 5, p * 3, p);
+        } else {
+            drawPixelRect(x + p, y + p * 5, p * 2, p);
+            drawPixelRect(x + p * 5, y + p * 5, p * 2, p);
+        }
+    }
+    
+    // Draw Pipe
+    function drawPipe(obs) {
+        const x = Math.floor(obs.x);
+        const y = Math.floor(obs.y);
+        const w = obs.width;
+        const h = obs.height;
+        const p = PIXEL;
+        
+        const lipHeight = p * 3;
+        const lipOverhang = p * 2;
+        
+        ctx.fillStyle = COLORS.pipeLight;
+        drawPixelRect(x - lipOverhang, y, lipOverhang + p * 2, lipHeight);
+        
+        ctx.fillStyle = COLORS.pipe;
+        drawPixelRect(x + p * 2, y, w - p * 4, lipHeight);
+        
+        ctx.fillStyle = COLORS.pipeDark;
+        drawPixelRect(x + w - p * 2, y, p * 2 + lipOverhang, lipHeight);
+        
+        ctx.fillStyle = COLORS.pipeLight;
+        drawPixelRect(x, y + lipHeight, p * 2, h - lipHeight);
+        
+        ctx.fillStyle = COLORS.pipe;
+        drawPixelRect(x + p * 2, y + lipHeight, w - p * 4, h - lipHeight);
+        
+        ctx.fillStyle = COLORS.pipeDark;
+        drawPixelRect(x + w - p * 2, y + lipHeight, p * 2, h - lipHeight);
+        
+        ctx.fillStyle = COLORS.pipeLight;
+        drawPixelRect(x + p, y + lipHeight, p, h - lipHeight);
+    }
+    
+    // Draw Coin
+    function drawCoin(coin) {
+        const x = Math.floor(coin.x);
+        const y = Math.floor(coin.y);
+        const p = PIXEL;
+        const spinFrame = Math.floor(frameCount / 4) % 4;
+        
+        let width = p * 2;
+        if (spinFrame === 1 || spinFrame === 3) width = p;
+        
+        const offset = (p * 2 - width) / 2;
+        
+        ctx.fillStyle = COLORS.coin;
+        drawPixelRect(x + offset + p, y, width, p);
+        drawPixelRect(x + offset, y + p, width + p * 2, p * 3);
+        drawPixelRect(x + offset + p, y + p * 4, width, p);
+        
+        if (spinFrame !== 1) {
+            ctx.fillStyle = COLORS.coinLight;
+            drawPixelRect(x + offset + p, y + p, p, p);
+        }
+        
+        if (spinFrame === 0 || spinFrame === 2) {
+            ctx.fillStyle = COLORS.coinDark;
+            drawPixelRect(x + p, y + p * 2, p, p);
+        }
+    }
+    
+    // Draw Question Block
+    function drawQuestionBlock(block) {
+        const x = Math.floor(block.x);
+        const y = Math.floor(block.y);
+        const p = PIXEL;
+        const s = block.size;
+        
+        ctx.fillStyle = COLORS.questionBlock;
+        drawPixelRect(x, y, s, s);
+        
+        ctx.fillStyle = COLORS.questionBlockDark;
+        drawPixelRect(x, y, s, p);
+        drawPixelRect(x, y, p, s);
+        drawPixelRect(x + s - p, y, p, s);
+        drawPixelRect(x, y + s - p, s, p);
+        
+        ctx.fillStyle = COLORS.brickLight;
+        drawPixelRect(x + p, y + p, s - p * 2, p);
+        drawPixelRect(x + p, y + p, p, s - p * 2);
+        
+        ctx.fillStyle = COLORS.questionBlockDark;
+        drawPixelRect(x + p, y + s - p * 2, s - p * 2, p);
+        drawPixelRect(x + s - p * 2, y + p, p, s - p * 2);
+        
+        ctx.fillStyle = '#000';
+        const qx = x + s / 2 - p;
+        const qy = y + s / 2 - p * 2;
+        drawPixelRect(qx, qy, p * 2, p);
+        drawPixelRect(qx + p, qy + p, p, p * 2);
+        drawPixelRect(qx, qy + p * 3, p * 2, p);
+        drawPixelRect(qx, qy + p * 5, p * 2, p);
+    }
+    
+    // Draw Ground
+    function drawGround() {
+        const p = PIXEL;
+        const groundHeight = canvas.height - GROUND_Y;
+        
+        ctx.fillStyle = COLORS.ground;
+        ctx.fillRect(0, GROUND_Y, canvas.width, groundHeight);
+        
+        ctx.fillStyle = COLORS.groundLight;
+        for (let i = 0; i < canvas.width / (p * 4); i++) {
+            const bx = ((i * p * 4) - (frameCount * gameSpeed) % (p * 4) + canvas.width) % canvas.width;
+            drawPixelRect(bx, GROUND_Y, p * 3, p);
+        }
+        
+        ctx.fillStyle = COLORS.groundDark;
+        drawPixelRect(0, GROUND_Y + p, canvas.width, p);
+        
+        for (let row = 0; row < 3; row++) {
+            const offset = row % 2 === 0 ? 0 : p * 4;
+            for (let i = -1; i < canvas.width / (p * 8) + 2; i++) {
+                const bx = ((i * p * 8 + offset) - (frameCount * gameSpeed * 0.5) % (p * 8) + canvas.width + p * 8) % (canvas.width + p * 16) - p * 8;
+                ctx.fillStyle = COLORS.groundDark;
+                drawPixelRect(bx, GROUND_Y + p * 2 + row * p * 4, p, p * 4);
+                drawPixelRect(bx, GROUND_Y + p * 2 + row * p * 4 + p * 3, p * 8, p);
+            }
+        }
+    }
+    
+    // Draw Background
+    function drawBackground() {
+        const gradient = ctx.createLinearGradient(0, 0, 0, GROUND_Y);
+        gradient.addColorStop(0, COLORS.skyGradient);
+        gradient.addColorStop(1, COLORS.sky);
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, canvas.width, GROUND_Y);
+        
+        hills.forEach(hill => {
+            drawHill(hill.x, hill.size);
+            if (gameRunning) {
+                hill.x -= gameSpeed * 0.2;
+                if (hill.x < -200) hill.x = canvas.width + 100;
+            }
+        });
+        
+        clouds.forEach(cloud => {
+            drawCloud(cloud.x, cloud.y, cloud.type);
+            if (gameRunning) {
+                cloud.x -= gameSpeed * 0.3;
+                if (cloud.x < -100) {
+                    cloud.x = canvas.width + 50;
+                    cloud.y = 40 + Math.random() * 60;
+                    cloud.type = Math.floor(Math.random() * 3);
+                }
+            }
+        });
+        
+        bushes.forEach(bush => {
+            drawBush(bush.x, bush.size);
+            if (gameRunning) {
+                bush.x -= gameSpeed * 0.5;
+                if (bush.x < -100) {
+                    bush.x = canvas.width + 50;
+                    bush.size = 1 + Math.floor(Math.random() * 2);
+                }
+            }
+        });
+    }
+    
+    // Particles
+    function drawParticles() {
+        particles.forEach((p, i) => {
+            p.x += p.vx;
+            p.y += p.vy;
+            p.vy += 0.3;
+            p.life -= 0.03;
+            
+            if (p.life <= 0) {
+                particles.splice(i, 1);
+                return;
+            }
+            
+            ctx.fillStyle = p.color;
+            ctx.globalAlpha = p.life;
+            drawPixelRect(p.x, p.y, p.size, p.size);
+            ctx.globalAlpha = 1;
+        });
+    }
+    
+    function createCoinParticles(x, y) {
+        for (let i = 0; i < 6; i++) {
+            particles.push({
+                x, y,
+                vx: (Math.random() - 0.5) * 8,
+                vy: -Math.random() * 6 - 2,
+                size: PIXEL,
+                life: 1,
+                color: COLORS.coin
+            });
+        }
+    }
+    
+    function createJumpParticles() {
+        for (let i = 0; i < 4; i++) {
+            particles.push({
+                x: player.x + player.width / 2,
+                y: GROUND_Y,
+                vx: (Math.random() - 0.5) * 4,
+                vy: -Math.random() * 2,
+                size: PIXEL,
+                life: 1,
+                color: COLORS.groundLight
+            });
+        }
+    }
+    
+    function createDeathParticles() {
+        for (let i = 0; i < 12; i++) {
+            particles.push({
+                x: player.x + player.width / 2,
+                y: player.y + player.height / 2,
+                vx: (Math.random() - 0.5) * 10,
+                vy: (Math.random() - 0.5) * 10,
+                size: PIXEL * 2,
+                life: 1,
+                color: i % 2 === 0 ? COLORS.mario.red : COLORS.mario.blue
+            });
+        }
+    }
+    
+    // Spawning
+    function spawnObstacle() {
+        const type = Math.random();
+        
+        if (type < 0.4) {
+            obstacles.push({
+                type: 'goomba',
+                x: canvas.width + 20,
+                y: GROUND_Y - PIXEL * 6,
+                width: PIXEL * 8,
+                height: PIXEL * 6
+            });
+        } else if (type < 0.7) {
+            const height = (Math.floor(Math.random() * 2) + 2) * PIXEL * 8;
+            obstacles.push({
+                type: 'pipe',
+                x: canvas.width + 20,
+                y: GROUND_Y - height,
+                width: PIXEL * 8,
+                height: height
+            });
+        } else {
+            obstacles.push({
+                type: 'block',
+                x: canvas.width + 20,
+                y: GROUND_Y - PIXEL * 20 - Math.random() * PIXEL * 8,
+                width: PIXEL * 8,
+                height: PIXEL * 8,
+                size: PIXEL * 8,
+                hit: false
+            });
+        }
+    }
+    
+    function spawnCoin() {
+        coinObjects.push({
+            x: canvas.width + 20,
+            y: GROUND_Y - PIXEL * 10 - Math.random() * PIXEL * 15,
+            width: PIXEL * 4,
+            height: PIXEL * 5,
+            collected: false
+        });
+    }
+    
+    // Collision Detection
+    function checkCollisions() {
+        if (player.invincible > 0) {
+            player.invincible--;
+            return;
+        }
+        
+        for (const obs of obstacles) {
+            if (obs.type === 'block' && obs.hit) continue;
+            
+            const hitbox = {
+                x: player.x + PIXEL * 2,
+                y: player.y + PIXEL,
+                width: player.width - PIXEL * 4,
+                height: player.height - PIXEL * 2
+            };
+            
+            if (
+                hitbox.x < obs.x + obs.width &&
+                hitbox.x + hitbox.width > obs.x &&
+                hitbox.y < obs.y + obs.height &&
+                hitbox.y + hitbox.height > obs.y
+            ) {
+                if (obs.type === 'goomba' && player.velocityY > 0 && hitbox.y + hitbox.height < obs.y + obs.height / 2) {
+                    obstacles.splice(obstacles.indexOf(obs), 1);
+                    player.velocityY = JUMP_FORCE * 0.6;
+                    score += 100;
+                    createDeathParticles();
+                    return;
+                }
+                
+                if (obs.type !== 'block') {
+                    gameOver();
+                    return;
+                }
+            }
+        }
+        
+        coinObjects.forEach((coin) => {
+            if (coin.collected) return;
+            
+            if (
+                player.x < coin.x + coin.width &&
+                player.x + player.width > coin.x &&
+                player.y < coin.y + coin.height &&
+                player.y + player.height > coin.y
+            ) {
+                coin.collected = true;
+                coins++;
+                score += 50;
+                scoreDisplay.textContent = 'COINS: ' + coins;
+                createCoinParticles(coin.x + coin.width / 2, coin.y + coin.height / 2);
+            }
+        });
+    }
+    
+    function jump() {
+        if (!gameRunning) return;
+        
+        if (player.jumpsLeft > 0) {
+            player.velocityY = JUMP_FORCE;
+            player.isOnGround = false;
+            player.jumpsLeft--;
+            
+            if (player.y >= GROUND_Y - 10) {
+                createJumpParticles();
+            }
+        }
+    }
+    
+    function update() {
+        if (!gameRunning) return;
+        
+        frameCount++;
+        gameSpeed += GAME_SPEED_INCREMENT;
+        
+        player.velocityY += GRAVITY;
+        player.y += player.velocityY;
+        
+        if (player.y >= GROUND_Y) {
+            player.y = GROUND_Y;
+            player.velocityY = 0;
+            player.isOnGround = true;
+            player.jumpsLeft = 2;
+        }
+        
+        obstacles = obstacles.filter(obs => {
+            obs.x -= gameSpeed;
+            return obs.x > -100;
+        });
+        
+        coinObjects = coinObjects.filter(coin => {
+            coin.x -= gameSpeed;
+            return coin.x > -50 && !coin.collected;
+        });
+        
+        if (frameCount % Math.floor(100 / (gameSpeed / GAME_SPEED_INITIAL)) === 0) {
+            if (Math.random() < 0.6) spawnObstacle();
+        }
+        if (frameCount % 60 === 0 && Math.random() < 0.7) {
+            spawnCoin();
+        }
+        
+        if (frameCount % 15 === 0) {
+            score++;
+        }
+        
+        checkCollisions();
+    }
+    
+    function render() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        drawBackground();
+        drawGround();
+        
+        obstacles.forEach(obs => {
+            if (obs.type === 'goomba') drawGoomba(obs);
+            else if (obs.type === 'pipe') drawPipe(obs);
+            else if (obs.type === 'block') drawQuestionBlock(obs);
+        });
+        
+        coinObjects.filter(c => !c.collected).forEach(drawCoin);
+        
+        drawParticles();
+        drawMario();
+    }
+    
+    function gameLoop() {
+        update();
+        render();
+        requestAnimationFrame(gameLoop);
+    }
+    
+    function startGame() {
+        gameRunning = true;
+        score = 0;
+        coins = 0;
+        gameSpeed = GAME_SPEED_INITIAL;
+        frameCount = 0;
+        player.y = GROUND_Y;
+        player.velocityY = 0;
+        player.jumpsLeft = 2;
+        player.isOnGround = true;
+        player.invincible = 0;
+        player.runFrame = 0;
+        obstacles = [];
+        coinObjects = [];
+        particles = [];
+        
+        initBackground();
+        
+        scoreDisplay.textContent = 'COINS: 0';
+        startOverlay.classList.add('hidden');
+        gameOverOverlay.classList.add('hidden');
+    }
+    
+    function gameOver() {
+        gameRunning = false;
+        createDeathParticles();
+        
+        const totalScore = score + coins * 50;
+        
+        if (totalScore > highScore) {
+            highScore = totalScore;
+            localStorage.setItem('superRunHighScore', highScore.toString());
+            highScoreDisplay.textContent = 'BEST: ' + highScore;
+            newHighScoreEl.classList.remove('hidden');
+        } else {
+            newHighScoreEl.classList.add('hidden');
+        }
+        
+        finalScoreEl.textContent = totalScore;
+        gameOverOverlay.classList.remove('hidden');
+    }
+    
+    // Event Listeners
+    startBtn.addEventListener('click', startGame);
+    restartBtn.addEventListener('click', startGame);
+    
+    document.addEventListener('keydown', (e) => {
+        if (e.code === 'Space' || e.code === 'ArrowUp') {
+            e.preventDefault();
+            if (!gameRunning && !startOverlay.classList.contains('hidden')) {
+                startGame();
+            } else if (!gameRunning && !gameOverOverlay.classList.contains('hidden')) {
+                startGame();
+            } else {
+                jump();
+            }
+        }
+    });
+    
+    canvas.addEventListener('click', () => {
+        if (!gameRunning) startGame();
+        else jump();
+    });
+    
+    canvas.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        if (!gameRunning) startGame();
+        else jump();
+    });
+    
+    // Start
+    render();
+    gameLoop();
+})();
+</script>
+</body>
+</html>
