@@ -1,74 +1,128 @@
-# 🎮 Super Run!
+<div align="center">
 
-A retro Mario-style infinite runner game built with vanilla JavaScript and HTML5 Canvas.
+# 🇺🇸 TRUMP RUN 🇺🇸
+### Make Gaming Great Again
 
-![Super Run Game](https://img.shields.io/badge/Game-Play%20Now!-red?style=for-the-badge)
+[![Play Now](https://img.shields.io/badge/🎮_PLAY_THE_FULL_GAME-BF0A30?style=for-the-badge&logoColor=white)](https://elgran666.github.io/super-run-game/)
+[![GitHub](https://img.shields.io/badge/View_Code-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Elgran666/super-run-game)
+
+<img src="https://img.shields.io/badge/Made%20with-JavaScript-F7DF1E?style=flat-square&logo=javascript&logoColor=black"/>
+<img src="https://img.shields.io/badge/HTML5-Canvas-E34F26?style=flat-square&logo=html5&logoColor=white"/>
+<img src="https://img.shields.io/badge/Pure-Vanilla%20JS-yellow?style=flat-square"/>
+<img src="https://img.shields.io/badge/Difficulty-BIGLY_HARD-BF0A30?style=flat-square"/>
+
+</div>
+
+---
 
 ## 🕹️ Play
 
-**[▶️ Play the game here](https://YOUR_USERNAME.github.io/super-run-game/)**
+**[▶️ Play Trump Run here](https://elgran666.github.io/super-run-game/)**
+
+---
 
 ## ✨ Features
 
-- 🏃 **Classic Mario-style pixel art graphics**
-- 🍄 **Stomp Goombas** for bonus points!
-- 🪙 **Collect spinning coins**
-- 🟢 **Jump over pipes** of varying heights
-- ❓ **Avoid question blocks**
+- 🟠 Play as **Trump** — orange face, golden combover, MAGA hat, and a tie that's way too long
+- 😎 **Biden** walks toward you — blast him with rockets before he reaches you
+- 🕶️ **Obama & Hillary** unlock at higher scores — faster and more aggressive
+- 🚀 **Fire rockets** at enemies for +$5 each
+- 💵 **Collect dollar bills** — they fly across the screen, grab them all
+- 🍔 **Big Mac power-ups** restore a life
+- 🧱 **Obstacles** — CNN vans, fake news newspaper piles, and brick walls to jump over
 - ⬆️ **Double jump** ability
-- 🏆 **High score** saved locally
-- 📱 **Mobile-friendly** - works with touch!
+- 🏆 High score tracking
+- 📱 Mobile-friendly — tap to jump and shoot
+- 🇺🇸 Scrolling **Trump Wall** background with signs
+
+---
 
 ## 🎯 Controls
 
 | Input | Action |
-|-------|--------|
-| `SPACE` | Jump |
-| `↑` Arrow | Jump |
-| Click/Tap | Jump |
+|---|---|
+| `SPACE` / `↑` | Jump |
+| `SPACE` / `↑` again (mid-air) | Double Jump |
+| `F` / `X` / `Z` key | 🚀 Fire Rocket |
+| **Tap left side** | Jump |
+| **Tap right side** | Fire Rocket |
 
-**Pro tip:** You can double jump! Use it wisely to dodge obstacles.
-
-## 🛠️ Tech Stack
-
-- Pure HTML5, CSS3, JavaScript
-- HTML5 Canvas for rendering
-- No frameworks or dependencies!
-- LocalStorage for high scores
-
-## 🚀 Quick Start
-
-1. Clone this repo
-2. Open `index.html` in your browser
-3. That's it! No build step needed.
-
-```bash
-git clone https://github.com/YOUR_USERNAME/super-run-game.git
-cd super-run-game
-open index.html  # or just double-click the file
-```
-
-## 📦 Deploy to GitHub Pages
-
-1. Go to your repo Settings
-2. Navigate to **Pages** (left sidebar)
-3. Under "Source", select **Deploy from a branch**
-4. Choose `main` branch and `/ (root)` folder
-5. Click Save
-6. Your game will be live at `https://YOUR_USERNAME.github.io/super-run-game/`
-
-## 🎨 Customization
-
-Feel free to modify:
-- `GAME_SPEED_INITIAL` - Starting speed
-- `GRAVITY` - How fast you fall
-- `JUMP_FORCE` - How high you jump
-- `COLORS` object - Change the color palette
-
-## 📄 License
-
-MIT License - feel free to use this however you want!
+> **Pro tip:** You get a reload cooldown after each rocket — watch the HUD for **🚀 READY** before firing again!
 
 ---
 
-Made with ❤️ and pixels
+## 🏆 Scoring
+
+| Action | Points |
+|---|---|
+| Survive (time) | +1 every few seconds |
+| Collect 💵 dollar bill | +$1 |
+| Blast enemy with rocket | +$5 |
+
+---
+
+## 👾 Enemies
+
+| Enemy | Speed | Unlocks |
+|---|---|---|
+| 😎 Biden | Normal | From the start |
+| 🕶️ Obama | Fast | After 500 frames |
+| 👘 Hillary | Medium | After 500 frames |
+
+---
+
+## 🛠️ Tech Stack
+
+- Pure **HTML5**, **CSS3**, **JavaScript**
+- **HTML5 Canvas** for all rendering — every character drawn with code, no sprites
+- **Web Audio API** for sound effects — no audio files needed
+- No frameworks, no dependencies, no build step
+
+---
+
+## 🚀 Quick Start
+
+```bash
+git clone https://github.com/Elgran666/super-run-game.git
+cd super-run-game
+open index.html   # or just double-click it
+```
+
+No build step. No npm install. Just open and play.
+
+---
+
+## 📦 Deploy to GitHub Pages
+
+1. Go to your repo **Settings**
+2. Navigate to **Pages** (left sidebar)
+3. Under "Source" → select **Deploy from a branch**
+4. Choose `main` branch and `/ (root)` folder
+5. Click **Save**
+6. Live at `https://elgran666.github.io/super-run-game/`
+
+---
+
+## 🎨 Customisation
+
+Want to tweak the game? Everything's in `index.html`:
+
+```javascript
+var GRAV   = .6;    // gravity — higher = falls faster
+var JV     = -13;   // jump force — more negative = higher jump
+var DJV    = -11;   // double jump force
+var RELOAD = 40;    // rocket reload speed in frames
+var INV    = 110;   // invincibility frames after getting hit
+```
+
+---
+
+## 📄 License
+
+MIT License — do whatever you want with it.
+
+---
+
+<div align="center">
+Made with ❤️, pixels, and tremendous amounts of winning
+</div>
